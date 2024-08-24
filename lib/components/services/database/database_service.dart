@@ -86,6 +86,48 @@ when user registers, create an account for them but store their details in the d
     return null;
   }
 
+  //Delete User Info
+  Future<void> deleteUserInfoFromFireBase(String uid) async {
+    WriteBatch batch = _db.batch();
+
+    //delete user doc
+    DocumentReference userDoc = _db.collection("Users").doc(uid);
+    batch.delete(userDoc);
+
+    //delete user posts
+    QuerySnapshot userPosts =
+        await _db.collection("Posts").where('uid', isEqualTo: uid).get();
+
+    for (var post in userPosts.docs) {
+      batch.delete(post.reference);
+    }
+
+    //delete user comments
+    QuerySnapshot userComments =
+        await _db.collection("Comments").where('uid', isEqualTo: uid).get();
+    for (var comment in userComments.docs) {
+      batch.delete(comment.reference);
+    }
+
+    //delete likes done by this user
+    QuerySnapshot allPosts = await _db.collection("Posts").get();
+
+    for (QueryDocumentSnapshot post in allPosts.docs) {
+      Map<String, dynamic> postData = post.data() as Map<String, dynamic>;
+      var likedBy = postData['likedBy'] as List<dynamic>? ?? [];
+      // batch.delete(like.reference);
+      if (likedBy.contains(uid)) {
+        batch.update(post.reference, {
+          'likedBy': FieldValue.arrayRemove([uid]),
+          'likes': FieldValue.increment(-1),
+        });
+      }
+    }
+
+    //commit batch
+    await batch.commit();
+  }
+
   /*
    POST MESSAGE
   
@@ -326,5 +368,97 @@ when user registers, create an account for them but store their details in the d
     //return as a list of uids
 
     return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
+  /*
+  FOLLOW
+
+  */
+
+  //FOLOW USER
+  Future<void> followUserInFireBase(String uid) async {
+    //get current logged in user
+    final currentUserId = _auth.currentUser!.uid;
+
+    //add this user to following list
+    await _db
+        .collection("Users")
+        .doc(currentUserId)
+        .collection("Following")
+        .doc(uid)
+        .set({});
+
+    //add current user to the target user's followers
+    await _db
+        .collection("Users")
+        .doc(uid)
+        .collection("Followers")
+        .doc(currentUserId)
+        .set({});
+  }
+
+  //UNFOLLOW user
+  Future<void> unfollowUserFromFirebase(String uid) async {
+    //get current logged in user
+    final currentUserId = _auth.currentUser!.uid;
+
+    //remove this user from following list
+    await _db
+        .collection("Users")
+        .doc(currentUserId)
+        .collection("Following")
+        .doc(uid)
+        .delete();
+
+    //remove current user from the target user's followers
+    await _db
+        .collection("Users")
+        .doc(uid)
+        .collection("Followers")
+        .doc(currentUserId)
+        .delete();
+  }
+
+  //GET list of user's follower: list of uids
+
+  Future<List<String>> getFollowerUidsFromFirebase(String uid) async {
+    //get the followers from firebase
+    final snapshot =
+        await _db.collection("Users").doc(uid).collection("Followers").get();
+
+    //return as a simple list of uids
+    return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
+  //GET list of user's following: list of uids
+  Future<List<String>> getFollowingUidsFromFirebase(String uid) async {
+    //get the following from firebase
+    final snapshot =
+        await _db.collection("Users").doc(uid).collection("Following").get();
+
+    //return as a simple list of uids
+    return snapshot.docs.map((doc) => doc.id).toList();
+  }
+
+//
+/*
+SEARCH 
+*/
+//search for users by name
+  Future<List<UserProfile>> searchUserInFirebase(String query) async {
+    try {
+      //get the data from firebase
+      final snapshot = await _db
+          .collection("Users")
+          .where("username", isGreaterThanOrEqualTo: query)
+          .where('username', isLessThanOrEqualTo: "$query\uf8ff")
+          .get();
+
+      //return as a list of users
+      return snapshot.docs.map((doc) => UserProfile.fromDocument(doc)).toList();
+    } catch (e) {
+      print(e.toString());
+      return [];
+    }
   }
 }

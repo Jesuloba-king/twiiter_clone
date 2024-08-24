@@ -4,6 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:twitter_clone/components/my_settings_tile.dart';
 import 'package:twitter_clone/themes/theme_provider.dart';
 
+import '../helper/navigate_pages.dart';
+
 /*
 
 
@@ -42,14 +44,33 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
 
           //block user
-          MySettingsTile(
-            title: "Block User",
-            action: CupertinoSwitch(
-              value:
-                  Provider.of<ThemeProvider>(context, listen: false).isDarkMode,
-              onChanged: (value) =>
-                  Provider.of<ThemeProvider>(context, listen: false)
-                      .toggleTheme(),
+          GestureDetector(
+            onTap: () => gotoBlockPages(context),
+            child: MySettingsTile(
+              title: "Block User",
+              action: IconButton(
+                onPressed: () => gotoBlockPages(context),
+                icon: Icon(
+                  Icons.arrow_forward_ios,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ),
+
+          //account settings tile
+
+          GestureDetector(
+            onTap: () => goAccountSettingspage(context),
+            child: MySettingsTile(
+              title: "Account Settings",
+              action: IconButton(
+                onPressed: () => goAccountSettingspage(context),
+                icon: Icon(
+                  Icons.settings,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
             ),
           ),
         ],

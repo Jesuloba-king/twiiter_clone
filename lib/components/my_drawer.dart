@@ -5,6 +5,7 @@ import 'package:twitter_clone/components/services/auth/auth_service.dart';
 import 'package:twitter_clone/pages/profile.dart';
 
 import '../pages/homepage.dart';
+import '../pages/search_page.dart';
 import '../pages/settings.dart';
 import 'my_loading.dart';
 
@@ -111,7 +112,7 @@ class _MyDrawerState extends State<MyDrawer>
                   height: 20,
                 ),
 
-                //search by meter
+                //home
                 MyListTile(
                     text: "H O M E",
                     icon: Icons.home_filled,
@@ -141,11 +142,21 @@ class _MyDrawerState extends State<MyDrawer>
                   },
                 ),
 
-                //email
+                //search
                 MyListTile(
-                    text: "S E A R C H",
-                    icon: Icons.search_rounded,
-                    onTap: () => Navigator.pop(context)),
+                  text: "S E A R C H",
+                  icon: Icons.search_rounded,
+                  onTap: () {
+                    Navigator.pop(context);
+                    //
+                    Navigator.push(context,
+                        MaterialPageRoute(builder: (context) {
+                      return SearchPage(
+                          // uid: _auth.getCurrentUid(),
+                          );
+                    }));
+                  },
+                ),
 
                 //phone
                 MyListTile(

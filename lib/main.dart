@@ -36,9 +36,11 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Twitter Clone By Mitch',
       theme: Provider.of<ThemeProvider>(context).themeData,
-      // themeMode: ThemeMode.system,
+      themeMode: ThemeMode.system,
+      initialRoute: '/',
+      routes: {'/': (context) => const AuthGate()},
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(),
+      // home: const AuthGate(),
       // HomePage(),
     );
   }

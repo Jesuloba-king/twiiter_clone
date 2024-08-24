@@ -1,12 +1,12 @@
 // ignore_for_file: avoid_print, use_build_context_synchronously
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:twitter_clone/components/my_textfiled.dart';
 import 'package:twitter_clone/components/services/auth/auth_service.dart';
 import 'package:twitter_clone/models/post.dart';
 
+import '../helper/time_formatter.dart';
 import 'services/database/database_provider.dart';
 
 class MyPostTile extends StatefulWidget {
@@ -41,6 +41,19 @@ class _MyPostTileState extends State<MyPostTile> {
       print(e);
     }
   }
+
+  /*
+  SHOW OPTIONS
+
+  CASE 1: THIS post belongs to current user
+  - Delete
+  - Cancel
+
+  Case 2: this post does not belong to Current uSer
+  -Report
+  -Block
+  -Cnace;
+  */
 
   void showOptions() {
     //check if this post is owned by user or not
@@ -268,6 +281,14 @@ class _MyPostTileState extends State<MyPostTile> {
                     ),
                   ),
 
+                  // Spacer(),
+                  // //timstamp
+                  // Text(
+                  //   formatTimeStamp(widget.post.timestamp),
+                  //   style:
+                  //       TextStyle(color: Theme.of(context).colorScheme.primary),
+                  // ),
+
                   const Spacer(),
 
                   //delete icon -> ore options
@@ -359,7 +380,15 @@ class _MyPostTileState extends State<MyPostTile> {
                       ),
                     ),
                   ],
-                )
+                ),
+
+                Spacer(),
+                //timstamp
+                Text(
+                  formatTimeStamp(widget.post.timestamp),
+                  style:
+                      TextStyle(color: Theme.of(context).colorScheme.primary),
+                ),
               ],
             )
           ],

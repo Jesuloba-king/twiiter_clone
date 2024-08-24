@@ -12,6 +12,8 @@ this  handles everything with athentication in firebase
 
 import 'package:firebase_auth/firebase_auth.dart';
 
+import '../database/database_service.dart';
+
 class AuthService {
   //get instance of the auth
   final _auth = FirebaseAuth.instance;
@@ -50,5 +52,31 @@ class AuthService {
   Future<void> logoutEmailPassword() async {
     //attempt logut
     await _auth.signOut();
+  }
+
+  ///delete account
+  Future<void> deleteAccount() async {
+    //get current UserId
+    User? user = getCurrentUser();
+
+    if (user != null) {
+      //deelte user's data from firestore
+      await DatabaseService().deleteUserInfoFromFireBase(user.uid);
+
+      //delete the user's auth record
+      await user.delete();
+    }
+    //attempt delete account
+  }
+
+//forgotPassword
+  Future<void> forgotPasswordEmailPassword(String email) async {
+    User? user = getCurrentUser();
+    //attempt forgot password
+    try {
+      await _auth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw Exception(e.code);
+    }
   }
 }
